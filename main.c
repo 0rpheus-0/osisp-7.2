@@ -80,34 +80,13 @@ void modify_record(FILE *file, int id)
         return;
     }
     struct record_s temp;
-    while (1)
-    {
-        struct record_s temp_save = read_record(file, id), buffer;
-        memcpy(&buffer, &temp_save, sizeof(struct record_s));
-        printf("№ %d\t%s\t%s\t%d\n",
-               id,
-               temp_save.name,
-               temp_save.address,
-               temp_save.semester);
-        lock(file, id);
-
-        printf("New name: ");
-        scanf("%79s", temp.name);
-        printf("New address: ");
-        scanf("%79s", temp.address);
-        printf("New semester: ");
-        scanf("%d", &temp.semester);
-
-        struct record_s temp_new = read_record(file, id);
-        if (memcmp(&temp_new, &buffer, sizeof(struct record_s)) != 0)
-        {
-            unlock(file, id);
-            //--------------------------------//
-            printf("Record was modified by another process. Retrying...\n");
-            continue;
-        }
-        break;
-    }
+    lock(file, id);
+    printf("New name: ");
+    scanf("%79s", temp.name);
+    printf("New address: ");
+    scanf("%79s", temp.address);
+    printf("New semester: ");
+    scanf("%d", &temp.semester);
     put_record(file, id, temp);
     unlock(file, id);
 }
@@ -139,10 +118,17 @@ int main()
         exit(1);
     }
     record_count = st.st_size / sizeof(struct record_s);
+    fclose(file);
     char opt[256];
     printf("Start program\n");
     while (scanf("%s", opt))
     {
+        file = fopen("file", "r+");
+        if (!file)
+        {
+            printf("Error create file\n");
+            exit(1);
+        }
         if (!strcmp(opt, "l"))
             list(file);
         if (!strcmp(opt, "n"))
@@ -154,7 +140,7 @@ int main()
             get_record(file, id);
         if (sscanf(opt, "m%d", &id))
             modify_record(file, id);
+        fclose(file);
     }
-    fclose(file);
     return 0;
 }
