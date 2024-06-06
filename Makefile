@@ -4,7 +4,7 @@ CFLAGS = -W -Wall -std=c11 -pedantic -pthread -Wno-unused-parameter -Wno-unused-
 
 all : main generation
 
-run : main generation
+run : main file
 	./main
 
 main: main.c Makefile
